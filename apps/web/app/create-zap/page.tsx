@@ -32,7 +32,7 @@ import {
 	X,
 	Zap,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { SetStateAction, useCallback, useState } from "react";
 
 const initialNodes = [
 	{
@@ -93,16 +93,16 @@ export default function Component() {
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [currentNodeId, setCurrentNodeId] = useState(null);
+	const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const onConnect = useCallback(
-		(params) => setEdges((eds) => addEdge(params, eds)),
+		(params: any) => setEdges((eds) => addEdge(params, eds)),
 		[setEdges]
 	);
 
 	const updateNodeData = useCallback(
-		(id, newData) => {
+		(id: string, newData: any) => {
 			setNodes((nds) =>
 				nds.map((node) => {
 					if (node.id === id) {
@@ -115,13 +115,15 @@ export default function Component() {
 		[setNodes]
 	);
 
-	const handleNodeClick = useCallback((event, node) => {
+	const handleNodeClick = useCallback((event: any, node: { id: string; }) => {
 		setCurrentNodeId(node.id);
 		setDialogOpen(true);
 	}, []);
 
-	const handleOptionSelect = (option) => {
-		updateNodeData(currentNodeId, { label: option.name });
+	const handleOptionSelect = (option: { id?: string; name: any; description?: string; }) => {
+		if (currentNodeId) {
+			updateNodeData(currentNodeId, { label: option.name });
+		}
 		setDialogOpen(false);
 	};
 
@@ -130,14 +132,14 @@ export default function Component() {
 		const newNode = {
 			id: newNodeId,
 			data: { label: "Select Action", type: "action" },
-			position: { x: 250, y: nodes[nodes.length - 1].position.y + 150 },
+			position: { x: 250, y: (nodes[nodes.length - 1]?.position.y ?? 0) + 150 },
 		};
 		setNodes((nds) => [...nds, newNode]);
 		setEdges((eds) => [
 			...eds,
 			{
 				id: `edge-${edges.length + 1}`,
-				source: nodes[nodes.length - 1].id,
+				source: nodes[nodes.length - 1]?.id ?? '',
 				target: newNodeId,
 				markerEnd: { type: MarkerType.ArrowClosed },
 			},
