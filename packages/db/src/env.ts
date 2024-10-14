@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
+import { resolve } from "path";
 
-dotenv.config();
+dotenv.config({
+	path: resolve(__dirname, "../../../.env"),
+});
 
 const PORT = Number(process.env.PORT);
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);

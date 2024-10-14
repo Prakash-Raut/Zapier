@@ -7,7 +7,7 @@ const app = express();
 
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin: ["http://localhost:3000", "https://zapier-web-inky.vercel.app"],
 		credentials: true,
 	})
 );
