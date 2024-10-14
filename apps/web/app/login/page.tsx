@@ -5,6 +5,7 @@ import GoogleIcon from "@/components/icons/GoogleIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axiosInstance } from "@/lib/axiosInstance";
+import { NEXT_PROD_API_URL } from "@/lib/config";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,7 +28,7 @@ export default function Login() {
 			e.preventDefault();
 			setIsLoading(true);
 			const response = await axiosInstance.post(
-				"http://localhost:5000/api/v1/users/login",
+				`${NEXT_PROD_API_URL}/api/v1/users/login`,
 				{
 					email: user.email,
 					password: user.password,
