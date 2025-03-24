@@ -1,13 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-	JWT_EXPIRY,
-	JWT_SECRET,
-	REFRESH_TOKEN_EXPIRY,
-	REFRESH_TOKEN_SECRET,
-	SALT_ROUNDS,
-} from "./env";
+import { Config } from "./env";
 
 class PrismaConfig {
 	private static instance: PrismaConfig;
@@ -45,7 +39,7 @@ export const db = prisma.$extends({
 	model: {
 		user: {
 			async hashPassword(password: string): Promise<string> {
-				return bcrypt.hash(password, SALT_ROUNDS);
+				return bcrypt.hash(password, Config.BACKEND_SALT_ROUNDS);
 			},
 			async isPasswordCorrect(
 				inputPassword: string,
@@ -59,8 +53,8 @@ export const db = prisma.$extends({
 				return new Promise((resolve, reject) => {
 					jwt.sign(
 						{ id: user.id },
-						JWT_SECRET,
-						{ expiresIn: JWT_EXPIRY },
+						Config.BACKEND_JWT_SECRET,
+						{ expiresIn: Config.BACKEND_JWT_EXPIRY },
 						(err, token) => {
 							if (err) {
 								return reject(err);
@@ -76,8 +70,8 @@ export const db = prisma.$extends({
 				return new Promise((resolve, reject) => {
 					jwt.sign(
 						{ id: user.id },
-						REFRESH_TOKEN_SECRET,
-						{ expiresIn: REFRESH_TOKEN_EXPIRY },
+						Config.BACKEND_REFRESH_TOKEN_SECRET,
+						{ expiresIn: Config.BACKEND_REFRESH_TOKEN_EXPIRY },
 						(err, token) => {
 							if (err) {
 								return reject(err);

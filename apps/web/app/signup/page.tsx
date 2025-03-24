@@ -5,7 +5,7 @@ import GoogleIcon from "@/components/icons/GoogleIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axiosInstance } from "@/lib/axiosInstance";
-import { NEXT_PROD_API_URL } from "@/lib/config";
+import { NEXT_DEV_API_URL } from "@/lib/config";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,16 +28,16 @@ export default function SignUp() {
 		try {
 			setIsLoading(true);
 			const response = await axiosInstance.post(
-				`${NEXT_PROD_API_URL}/api/v1/users/register`,
-				user
+				`${NEXT_DEV_API_URL}/api/v1/users/register`,
+				user,
 			);
 			console.log(response);
 			console.log("Signup success", response.data);
 			toast.success("Signup success", response.data);
 			router.push("/login");
-		} catch (error: any) {
-			console.log("Signup failed", error.message);
-			toast.error(error.message);
+		} catch (error) {
+			console.error("Signup failed");
+			toast.error("Signup failed");
 		} finally {
 			setIsLoading(false);
 		}
@@ -59,8 +59,7 @@ export default function SignUp() {
 		<section className="container flex p-24 mx-auto w-full justify-center items-center max-w-7xl gap-20">
 			<div className="w-1/2">
 				<h2 className="scroll-m-20 pb-2 text-5xl font-semibold tracking-tight first:mt-0">
-					Join millions worldwide who automate their work using
-					Zapier.
+					Join millions worldwide who automate their work using Zapier.
 				</h2>
 				<div className="flex flex-col pt-10 space-y-6">
 					<CheckFeature label="Easy setup, no coding required" />
@@ -87,18 +86,14 @@ export default function SignUp() {
 					id="email"
 					type="text"
 					value={user.email}
-					onChange={(e) =>
-						setUser({ ...user, email: e.target.value })
-					}
+					onChange={(e) => setUser({ ...user, email: e.target.value })}
 					placeholder="Work Email"
 				/>
 				<Input
 					id="password"
 					type="password"
 					value={user.password}
-					onChange={(e) =>
-						setUser({ ...user, password: e.target.value })
-					}
+					onChange={(e) => setUser({ ...user, password: e.target.value })}
 					placeholder="Password"
 				/>
 
@@ -117,17 +112,11 @@ export default function SignUp() {
 
 				<p>
 					By signing up, you agree to Zapier's{" "}
-					<Link
-						href="#"
-						className="text-blue-900 underline"
-					>
+					<Link href="#" className="text-blue-900 underline">
 						terms of service
 					</Link>{" "}
 					and{" "}
-					<Link
-						href="#"
-						className="text-blue-900 underline"
-					>
+					<Link href="#" className="text-blue-900 underline">
 						privacy policy
 					</Link>
 					.

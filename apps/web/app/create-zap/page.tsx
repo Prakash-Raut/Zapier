@@ -1,5 +1,7 @@
 "use client";
 
+import "@xyflow/react/dist/style.css";
+
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -10,31 +12,42 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
-	addEdge,
 	Background,
+	type Connection,
 	Controls,
+	type Edge,
 	MarkerType,
 	MiniMap,
+	type Node,
 	ReactFlow,
+	addEdge,
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
 import {
 	Bell,
 	ChevronDown,
 	HelpCircle,
 	Home,
 	LayoutGrid,
-	Play,
 	Plus,
 	Settings,
-	X,
 	Zap,
 } from "lucide-react";
-import { SetStateAction, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
-const initialNodes = [
+interface NodeData {
+	label: string;
+	type: "trigger" | "action";
+}
+
+interface Option {
+	id: string;
+	name: string;
+	description: string;
+}
+
+const initialNodes: Node[] = [
 	{
 		id: "trigger",
 		type: "input",
@@ -48,7 +61,7 @@ const initialNodes = [
 	},
 ];
 
-const initialEdges = [
+const initialEdges: Edge[] = [
 	{
 		id: "trigger-action1",
 		source: "trigger",
@@ -57,7 +70,7 @@ const initialEdges = [
 	},
 ];
 
-const triggerOptions = [
+const triggerOptions: Option[] = [
 	{
 		id: "gmail",
 		name: "Gmail",
@@ -75,7 +88,7 @@ const triggerOptions = [
 	},
 ];
 
-const actionOptions = [
+const actionOptions: Option[] = [
 	{
 		id: "sheets",
 		name: "Google Sheets",
@@ -89,7 +102,7 @@ const actionOptions = [
 	{ id: "twitter", name: "Twitter", description: "Post a new tweet" },
 ];
 
-export default function Component() {
+export default function CreateZap() {
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -97,30 +110,33 @@ export default function Component() {
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const onConnect = useCallback(
-		(params: any) => setEdges((eds) => addEdge(params, eds)),
-		[setEdges]
+		(params: Connection) => setEdges((eds) => addEdge(params, eds)),
+		[setEdges],
 	);
 
 	const updateNodeData = useCallback(
-		(id: string, newData: any) => {
+		(id: string, newData: Partial<NodeData>) => {
 			setNodes((nds) =>
 				nds.map((node) => {
 					if (node.id === id) {
 						return { ...node, data: { ...node.data, ...newData } };
 					}
 					return node;
-				})
+				}),
 			);
 		},
-		[setNodes]
+		[setNodes],
 	);
 
-	const handleNodeClick = useCallback((event: any, node: { id: string; }) => {
-		setCurrentNodeId(node.id);
-		setDialogOpen(true);
-	}, []);
+	const handleNodeClick = useCallback(
+		(event: React.MouseEvent, node: { id: string }) => {
+			setCurrentNodeId(node.id);
+			setDialogOpen(true);
+		},
+		[],
+	);
 
-	const handleOptionSelect = (option: { id?: string; name: any; description?: string; }) => {
+	const handleOptionSelect = (option: Option) => {
 		if (currentNodeId) {
 			updateNodeData(currentNodeId, { label: option.name });
 		}
@@ -139,7 +155,7 @@ export default function Component() {
 			...eds,
 			{
 				id: `edge-${edges.length + 1}`,
-				source: nodes[nodes.length - 1]?.id ?? '',
+				source: nodes[nodes.length - 1]?.id ?? "",
 				target: newNodeId,
 				markerEnd: { type: MarkerType.ArrowClosed },
 			},
@@ -150,16 +166,16 @@ export default function Component() {
 		currentNodeId &&
 		nodes.find((n) => n.id === currentNodeId)?.data.type === "trigger"
 			? triggerOptions.filter((option) =>
-					option.name.toLowerCase().includes(searchTerm.toLowerCase())
-			  )
+					option.name.toLowerCase().includes(searchTerm.toLowerCase()),
+				)
 			: actionOptions.filter((option) =>
-					option.name.toLowerCase().includes(searchTerm.toLowerCase())
-			  );
+					option.name.toLowerCase().includes(searchTerm.toLowerCase()),
+				);
 
 	return (
-		<div className="flex h-screen bg-gray-100">
+		<div className="flex h-screen">
 			{/* Sidebar */}
-			<div className="w-16 bg-gray-800 text-white flex flex-col items-center py-4 space-y-4">
+			<div className="w-16 flex flex-col items-center py-4 space-y-4">
 				<Home className="w-6 h-6" />
 				<LayoutGrid className="w-6 h-6" />
 				<Zap className="w-6 h-6 text-orange-500" />
@@ -170,30 +186,20 @@ export default function Component() {
 			{/* Main content */}
 			<div className="flex-1 flex flex-col">
 				{/* Header */}
-				<header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+				<header className="border-b px-4 py-2 flex items-center justify-between">
 					<div className="flex items-center space-x-4">
-						<Button
-							variant="ghost"
-							size="sm"
-						>
+						<Button variant="ghost" size="sm">
 							<ChevronDown className="w-4 h-4 mr-2" />
 							Prakash Raut
 						</Button>
-						<span className="text-gray-500">/</span>
-						<span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm font-medium">
-							PR
-						</span>
+						<span>/</span>
+						<span className="px-2 py-1 rounded text-sm font-medium">PR</span>
 						<span className="font-medium">Untitled Zap</span>
-						<span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm font-medium">
-							Draft
-						</span>
+						<span className="px-2 py-1 rounded text-sm font-medium">Draft</span>
 					</div>
 					<div className="flex items-center space-x-4">
 						<span className="text-sm font-medium">124%</span>
-						<Button
-							variant="ghost"
-							size="sm"
-						>
+						<Button variant="ghost" size="sm">
 							<HelpCircle className="w-4 h-4 mr-2" />
 							Help
 						</Button>
@@ -208,7 +214,7 @@ export default function Component() {
 					</div>
 
 					{/* React Flow */}
-					<div className="h-[calc(100vh-250px)] border border-gray-200 rounded-lg overflow-hidden">
+					<div className="h-[calc(100vh-250px)] border rounded-lg overflow-hidden">
 						<ReactFlow
 							nodes={nodes}
 							edges={edges}
@@ -225,11 +231,7 @@ export default function Component() {
 					</div>
 
 					<div className="flex justify-center">
-						<Button
-							onClick={addNewAction}
-							variant="outline"
-							size="lg"
-						>
+						<Button onClick={addNewAction} variant="outline" size="lg">
 							<Plus className="w-4 h-4 mr-2" />
 							Add Action
 						</Button>
@@ -238,16 +240,12 @@ export default function Component() {
 			</div>
 
 			{/* Selection Dialog */}
-			<Dialog
-				open={dialogOpen}
-				onOpenChange={setDialogOpen}
-			>
+			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader>
 						<DialogTitle>
 							{currentNodeId &&
-							nodes.find((n) => n.id === currentNodeId)?.data
-								.type === "trigger"
+							nodes.find((n) => n.id === currentNodeId)?.data.type === "trigger"
 								? "Select a Trigger"
 								: "Select an Action"}
 						</DialogTitle>
@@ -263,38 +261,20 @@ export default function Component() {
 							{filteredOptions.map((option) => (
 								<div
 									key={option.id}
-									className="flex items-start p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+									className="flex items-start p-2 hover:rounded-lg cursor-pointer"
 									onClick={() => handleOptionSelect(option)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											handleOptionSelect(option);
+										}
+									}}
 								>
-									<div
-										className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-											currentNodeId &&
-											nodes.find(
-												(n) => n.id === currentNodeId
-											)?.data.type === "trigger"
-												? "bg-blue-100"
-												: "bg-green-100"
-										}`}
-									>
-										<Zap
-											className={`w-6 h-6 ${
-												currentNodeId &&
-												nodes.find(
-													(n) =>
-														n.id === currentNodeId
-												)?.data.type === "trigger"
-													? "text-blue-600"
-													: "text-green-600"
-											}`}
-										/>
+									<div className="w-10 h-10 rounded-full flex items-center justify-center mr-3">
+										<Zap className="w-6 h-6" />
 									</div>
 									<div>
-										<h3 className="font-medium">
-											{option.name}
-										</h3>
-										<p className="text-sm text-gray-500">
-											{option.description}
-										</p>
+										<h3 className="font-medium">{option.name}</h3>
+										<p className="text-sm">{option.description}</p>
 									</div>
 								</div>
 							))}

@@ -1,23 +1,23 @@
 import { db } from "@repo/db";
 import type { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET } from "../config/env";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import createHttpError from "http-errors";
+import jwt, { type JwtPayload } from "jsonwebtoken";
+import { Config } from "../config/env";
+import { asyncHandler } from "../utils";
 
 export const authMiddleware = asyncHandler(
-	async (req: Request, _: Response, next: NextFunction) => {
+	async (req: Request, _res: Response, next: NextFunction) => {
 		const token =
 			req.cookies?.accessToken ||
 			req.header("Authorization")?.replace("Bearer ", "");
 
 		if (!token) {
-			throw new ApiError(401, "Unauthorized request");
+			next(createHttpError(401, "Access token not found"));
 		}
 
 		const decodedToken: JwtPayload = jwt.verify(
 			token,
-			JWT_SECRET
+			Config.BACKEND_JWT_SECRET as string,
 		) as JwtPayload;
 
 		const user = await db.user.findFirst({
@@ -27,11 +27,11 @@ export const authMiddleware = asyncHandler(
 		});
 
 		if (!user) {
-			throw new ApiError(401, "Invalid access token");
+			next(createHttpError(401, "User not found"));
 		}
 
 		req.user = user;
 
 		next();
-	}
+	},
 );

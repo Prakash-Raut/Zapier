@@ -5,7 +5,7 @@ import GoogleIcon from "@/components/icons/GoogleIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axiosInstance } from "@/lib/axiosInstance";
-import { NEXT_PROD_API_URL } from "@/lib/config";
+import { NEXT_DEV_API_URL } from "@/lib/config";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,27 +23,27 @@ export default function Login() {
 	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const onLogin = async (e: any) => {
+	const onLogin = async (e: React.FormEvent) => {
 		try {
 			e.preventDefault();
 			setIsLoading(true);
 			const response = await axiosInstance.post(
-				`${NEXT_PROD_API_URL}/api/v1/users/login`,
+				`${NEXT_DEV_API_URL}/api/v1/users/login`,
 				{
 					email: user.email,
 					password: user.password,
 				},
 				{
 					withCredentials: true,
-				}
+				},
 			);
 			console.log("Login success", response.data);
 			toast.success("Login success");
 			console.log("Redirecting to dashboard");
 			router.push("/dashboard");
-		} catch (error: any) {
-			console.log("Login failed", error.message);
-			toast.error(error.message);
+		} catch (error) {
+			console.error("Login failed");
+			toast.error("Login Failed");
 		} finally {
 			setIsLoading(false);
 		}
@@ -61,8 +61,7 @@ export default function Login() {
 		<section className="container flex p-24 mx-auto w-full justify-center items-center max-w-7xl gap-20">
 			<div className="w-1/2">
 				<h2 className="scroll-m-20 pb-2 text-5xl font-semibold tracking-tight first:mt-0">
-					Join millions worldwide who automate their work using
-					Zapier.
+					Join millions worldwide who automate their work using Zapier.
 				</h2>
 				<div className="flex flex-col pt-10 space-y-6">
 					<CheckFeature label="Easy setup, no coding required" />
@@ -82,18 +81,14 @@ export default function Login() {
 					id="email"
 					type="text"
 					value={user.email}
-					onChange={(e) =>
-						setUser({ ...user, email: e.target.value })
-					}
+					onChange={(e) => setUser({ ...user, email: e.target.value })}
 					placeholder="Work Email"
 				/>
 				<Input
 					id="password"
 					type="password"
 					value={user.password}
-					onChange={(e) =>
-						setUser({ ...user, password: e.target.value })
-					}
+					onChange={(e) => setUser({ ...user, password: e.target.value })}
 					placeholder="Password"
 				/>
 
@@ -112,10 +107,7 @@ export default function Login() {
 
 				<p className="text-center">
 					Don&apos;t have a Zapier account yet?{" "}
-					<Link
-						href="/signup"
-						className="text-blue-900 underline"
-					>
+					<Link href="/signup" className="text-blue-900 underline">
 						Sign up
 					</Link>{" "}
 				</p>

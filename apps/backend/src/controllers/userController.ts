@@ -1,69 +1,70 @@
-import type { Request, Response } from "express";
 import { db } from "@repo/db";
+import type { NextFunction, Request, Response } from "express";
+import createHttpError from "http-errors";
 import { SigninSchema, SignupSchema } from "../types/schemas";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils";
 
-const registerUser = asyncHandler(async (req: Request, res: Response) => {
-	const { success, data, error } = SignupSchema.safeParse(req.body);
+const registerUser = asyncHandler(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { success, data } = SignupSchema.safeParse(req.body);
 
-	if (!success) {
-		throw new ApiError(400, "Invalid request body", error);
-	}
+		if (!success) {
+			return next(createHttpError(400, "Invalid request body"));
+		}
 
-	const { name, email, password } = data;
+		const { name, email, password } = data;
 
-	const existedUserWithEmail = await db.user.findFirst({
-		where: {
-			email,
-		},
-	});
+		const existedUserWithEmail = await db.user.findFirst({
+			where: {
+				email,
+			},
+		});
 
-	if (existedUserWithEmail) {
-		return res
-			.status(409)
-			.json(new ApiError(409, "User already exists with this email"));
-	}
+		if (existedUserWithEmail) {
+			return next(createHttpError(409, "User already exists with this email"));
+		}
 
-	const hashedPassword = await db.user.hashPassword(password);
+		const hashedPassword = await db.user.hashPassword(password);
 
-	const user = await db.user.create({
-		data: {
-			name,
-			email,
-			password: hashedPassword,
-		},
-	});
+		const user = await db.user.create({
+			data: {
+				name,
+				email,
+				password: hashedPassword,
+			},
+		});
 
-	if (!user) {
-		throw new ApiError(500, "Something went wrong while creating the user");
-	}
+		if (!user) {
+			return next(
+				createHttpError(500, "Something went wrong while creating the user"),
+			);
+		}
 
-	const createdUser = await db.user.findFirst({
-		where: {
-			email: data.email,
-		},
-		select: {
-			id: true,
-			email: true,
-			password: false,
-			createdAt: true,
-			updatedAt: true,
-		},
-	});
+		const createdUser = await db.user.findFirst({
+			where: {
+				email: data.email,
+			},
+			select: {
+				id: true,
+				email: true,
+				password: false,
+				createdAt: true,
+				updatedAt: true,
+			},
+		});
 
-	if (!createdUser) {
-		throw new ApiError(
-			500,
-			"Something went wrong while registering the user"
-		);
-	}
+		if (!createdUser) {
+			return next(
+				createHttpError(500, "Something went wrong while fetching the user"),
+			);
+		}
 
-	return res
-		.status(201)
-		.json(new ApiResponse(201, createdUser, "User created successfully"));
-});
+		return res.status(201).json({
+			id: createdUser.id,
+			message: "User created successfully",
+		});
+	},
+);
 
 const generateAccessAndRefereshTokens = async (userId: number) => {
 	try {
@@ -96,81 +97,79 @@ const generateAccessAndRefereshTokens = async (userId: number) => {
 	}
 };
 
-const loginUser = asyncHandler(async (req: Request, res: Response) => {
-	const { success, data, error } = SigninSchema.safeParse(req.body);
+const loginUser = asyncHandler(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { success, data } = SigninSchema.safeParse(req.body);
 
-	if (!success) {
-		throw new ApiError(400, "Invalid request body", error);
-	}
+		if (!success) {
+			return next(createHttpError(400, "Invalid request body"));
+		}
 
-	const { email, password } = data;
+		const { email, password } = data;
 
-	const user = await db.user.findFirst({
-		where: {
-			email,
-		},
-	});
+		const user = await db.user.findFirst({
+			where: {
+				email,
+			},
+		});
 
-	if (!user) {
-		throw new ApiError(404, "User not found with given email");
-	}
+		if (!user) {
+			return next(createHttpError(404, "User not found with given email"));
+		}
 
-	const encryptedPassword = await db.user.isPasswordCorrect(
-		password,
-		user.password
-	);
-
-	if (!encryptedPassword) {
-		throw new ApiError(401, "Invalid password");
-	}
-
-	const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
-		user.id
-	);
-
-	if (!accessToken || !refreshToken) {
-		throw new ApiError(500, "Something went wrong while generating tokens");
-	}
-
-	const loggedInUser = await db.user.findFirst({
-		where: {
-			email,
-		},
-		select: {
-			id: true,
-			email: true,
-			password: false,
-			createdAt: true,
-			updatedAt: true,
-		},
-	});
-
-	const options = {
-		httpOnly: true,
-		secure: true,
-	};
-
-	console.log("Logged In User: ", loggedInUser);
-
-	return res
-		.status(200)
-		.cookie("accessToken", accessToken, options)
-		.cookie("refreshToken", refreshToken, options)
-		.json(
-			new ApiResponse(
-				200,
-				{
-					user: loggedInUser,
-				},
-				"User logged in successfully"
-			)
+		const encryptedPassword = await db.user.isPasswordCorrect(
+			password,
+			user.password,
 		);
-});
+
+		if (!encryptedPassword) {
+			return next(createHttpError(401, "Invalid Username or Password"));
+		}
+
+		const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+			user.id,
+		);
+
+		if (!accessToken || !refreshToken) {
+			return next(
+				createHttpError(500, "Something went wrong while generating tokens"),
+			);
+		}
+
+		const loggedInUser = await db.user.findFirst({
+			where: {
+				email,
+			},
+			select: {
+				id: true,
+				email: true,
+				password: false,
+				createdAt: true,
+				updatedAt: true,
+			},
+		});
+
+		const options = {
+			httpOnly: true,
+			secure: true,
+		};
+
+		res
+			.status(200)
+			.cookie("accessToken", accessToken, options)
+			.cookie("refreshToken", refreshToken, options)
+			.json({
+				message: "User logged in successfully",
+				user: loggedInUser,
+			});
+	},
+);
 
 const getCurrentUser = async (req: Request, res: Response) => {
-	return res
-		.status(200)
-		.json(new ApiResponse(200, req.user, "User found successfully"));
+	res.status(200).json({
+		message: "User found successfully",
+		user: req.user,
+	});
 };
 
 const logoutUser = asyncHandler(async (req: Request, res: Response) => {
@@ -188,11 +187,13 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
 		secure: true,
 	};
 
-	return res
+	res
 		.status(200)
 		.clearCookie("accessToken", options)
 		.clearCookie("refreshToken", options)
-		.json(new ApiResponse(200, {}, "User logged Out"));
+		.json({
+			message: "User logged out",
+		});
 });
 
-export { getCurrentUser, loginUser, registerUser, logoutUser };
+export { getCurrentUser, loginUser, logoutUser, registerUser };

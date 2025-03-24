@@ -1,5 +1,5 @@
+import { db } from "@repo/db";
 import { Kafka } from "kafkajs";
-import {db} from "@repo/db";
 
 const TOPIC_NAME = "zap-events";
 
@@ -8,11 +8,11 @@ const kafka = new Kafka({
 	brokers: ["localhost:9092"],
 });
 
-async function main() {	
+async function main() {
 	const producer = kafka.producer();
 	await producer.connect();
 
-	while (1) {
+	while (true) {
 		const pendingRows = await db.zapRunOutbox.findMany({
 			where: {},
 			take: 10,

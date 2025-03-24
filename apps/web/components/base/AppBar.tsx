@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ModeToggle } from "./ModeToggle";
 import { buttonVariants } from "../ui/button";
+import { ModeToggle } from "./ModeToggle";
 
 export function AppBar() {
 	return (
@@ -10,35 +10,21 @@ export function AppBar() {
 			</div>
 			<nav className="flex justify-center items-center">
 				<ul className="flex space-x-6">
-					{
-						[
-							"Product",
-							"Solutions",
-							"Resources",
-							"Enterprises",
-							"Pricing",
-						].map((item) => (
+					{["Product", "Solutions", "Resources", "Enterprises", "Pricing"].map(
+						(item) => (
 							<li key={item}>
-								<Link href={`/${item.toLowerCase()}`}>
-									{item}
-								</Link>
+								<Link href={`/${item.toLowerCase()}`}>{item}</Link>
 							</li>
-						))
-					}
+						),
+					)}
 				</ul>
 			</nav>
 			<div className="flex space-x-4">
 				<ModeToggle />
-				<Link
-					href="/signup"
-					className={buttonVariants({ variant: "ghost" })}
-				>
+				<Link href="/signup" className={buttonVariants({ variant: "ghost" })}>
 					Contact Sales
 				</Link>
-				<Link
-					href="/login"
-					className={buttonVariants({ variant: "ghost" })}
-				>
+				<Link href="/login" className={buttonVariants({ variant: "ghost" })}>
 					Login
 				</Link>
 				<Link

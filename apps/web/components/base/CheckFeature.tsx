@@ -19,6 +19,7 @@ function CheckMark() {
 			stroke="green"
 			className="size-5"
 		>
+			<title>Check Mark</title>
 			<path
 				strokeLinecap="round"
 				strokeLinejoin="round"

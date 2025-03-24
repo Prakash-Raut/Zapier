@@ -1,22 +1,28 @@
 import dotenv from "dotenv";
-import { resolve } from "path";
+import { resolve } from "node:path";
 
 dotenv.config({
-	path: resolve(__dirname, "../../../.env"),
+  path: resolve(process.cwd(), ".env"),
 });
 
-const PORT = Number(process.env.PORT);
-const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
-const JWT_SECRET = String(process.env.JWT_SECRET);
-const JWT_EXPIRY = String(process.env.JWT_EXPIRY);
-const REFRESH_TOKEN_SECRET = String(process.env.REFRESH_TOKEN_SECRET);
-const REFRESH_TOKEN_EXPIRY = String(process.env.REFRESH_TOKEN_EXPIRY);
+const {
+	BACKEND_NODE_ENV,
+	BACKEND_PORT,
+	BACKEND_SALT_ROUNDS,
+	BACKEND_JWT_SECRET,
+	BACKEND_JWT_EXPIRY,
+	BACKEND_REFRESH_TOKEN_SECRET,
+	BACKEND_REFRESH_TOKEN_EXPIRY	,
+	FRONTEND_DOMAIN,
+} = process.env;
 
-export {
-	JWT_EXPIRY,
-	JWT_SECRET,
-	PORT,
-	REFRESH_TOKEN_EXPIRY,
-	REFRESH_TOKEN_SECRET,
-	SALT_ROUNDS,
+export const Config = {
+	BACKEND_NODE_ENV: String(BACKEND_NODE_ENV),
+	BACKEND_PORT: Number(BACKEND_PORT),
+	BACKEND_SALT_ROUNDS: Number(BACKEND_SALT_ROUNDS),
+	BACKEND_JWT_SECRET: String(BACKEND_JWT_SECRET),
+	BACKEND_JWT_EXPIRY: String(BACKEND_JWT_EXPIRY),
+	BACKEND_REFRESH_TOKEN_SECRET: String(BACKEND_REFRESH_TOKEN_SECRET),
+	BACKEND_REFRESH_TOKEN_EXPIRY: String(BACKEND_REFRESH_TOKEN_EXPIRY),
+	FRONTEND_DOMAIN: String(FRONTEND_DOMAIN),
 };

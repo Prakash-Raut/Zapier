@@ -9,9 +9,9 @@ export const Hero = () => {
 					Automate Without Limits
 				</h1>
 				<h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-					Turn chaos into smooth operations by automating workflows
-					yourself—no developers, no IT tickets, no delays. The only
-					limit is your imagination.
+					Turn chaos into smooth operations by automating workflows yourself—no
+					developers, no IT tickets, no delays. The only limit is your
+					imagination.
 				</h3>
 				<div className="flex space-x-4">
 					<Link

@@ -25,7 +25,7 @@ export const ZapCreateSchema = z.object({
 					message: "Action ID is required",
 				}),
 				actionMetadata: z.any().optional(),
-			})
+			}),
 		)
 		.nonempty({ message: "At least one action is required" }),
 });
